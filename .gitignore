@@ -68,3 +68,4 @@ external-references/
 [Aa]ssets/ML-Agents.meta
 results/
 # env-builds/
+.DS_Store
