@@ -17,18 +17,6 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
-    "com.unity.collections": {
-      "version": "2.2.1",
-      "depth": 2,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.burst": "1.8.8",
-        "com.unity.nuget.mono-cecil": "1.11.4",
-        "com.unity.modules.unityanalytics": "1.0.0",
-        "com.unity.test-framework.performance": "3.0.2"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.editorcoroutines": {
       "version": "1.0.0",
       "depth": 1,
@@ -90,31 +78,25 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ml-agents": {
-      "version": "file:D:/Unity/external-references/ml-agents/com.unity.ml-agents",
-      "depth": 0,
-      "source": "local",
+      "version": "3.0.0-exp.1",
+      "depth": 1,
+      "source": "registry",
       "dependencies": {
-        "com.unity.sentis": "2.0.0",
-        "com.unity.modules.imageconversion": "1.0.0",
+        "com.unity.sentis": "1.2.0-exp.2",
+        "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0",
-        "com.unity.modules.physics": "1.0.0"
-      }
+        "com.unity.modules.imageconversion": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.ml-agents.extensions": {
-      "version": "file:D:/Unity/external-references/ml-agents/com.unity.ml-agents.extensions",
+      "version": "file:/Users/keane/Documents/Coding Stuff/ml-agents/com.unity.ml-agents.extensions",
       "depth": 0,
       "source": "local",
       "dependencies": {
         "com.unity.ml-agents": "3.0.0-exp.1",
         "com.unity.modules.physics": "1.0.0"
       }
-    },
-    "com.unity.nuget.mono-cecil": {
-      "version": "1.11.4",
-      "depth": 3,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
     },
     "com.unity.performance.profile-analyzer": {
       "version": "1.2.2",
@@ -124,12 +106,12 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.sentis": {
-      "version": "2.0.0",
-      "depth": 1,
+      "version": "1.2.0-exp.2",
+      "depth": 2,
       "source": "registry",
       "dependencies": {
-        "com.unity.burst": "1.8.12",
-        "com.unity.collections": "2.2.1",
+        "com.unity.burst": "1.8.4",
+        "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.imageconversion": "1.0.0"
       },
       "url": "https://packages.unity.com"
@@ -148,16 +130,6 @@
       "dependencies": {
         "com.unity.ext.nunit": "1.0.6",
         "com.unity.modules.imgui": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.test-framework.performance": {
-      "version": "3.0.2",
-      "depth": 3,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.test-framework": "1.1.31",
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
