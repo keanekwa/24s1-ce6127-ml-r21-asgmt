@@ -6,6 +6,8 @@ using UnityEngine;
 public class AITank : MonoBehaviour
 {
     private const float speed = 20f;
+    private const float range = 30f;
+    private int score = 0;
     private Rigidbody rbody;
     private Vector3 origin;
 
@@ -26,8 +28,48 @@ public class AITank : MonoBehaviour
         rbody.MovePosition(newPos);
     }
 
+    private void Shoot()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, range))
+        {
+            if (hit.collider.CompareTag("EnemyAI"))
+            {
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
+                Debug.Log("Hit Enemy");
+                score += 2;
+            }
+            else if (hit.collider.CompareTag("Friendly"))
+            {   
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
+                Debug.Log("Hit Friendly");
+                score -= 1;
+            }
+        }
+        else
+        { 
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * range, Color.black); 
+        }
+    }
+
+    private int i = -200;
     void FixedUpdate()
     {
-        MoveX(-0.5f);
+        if (i > 0)
+        {
+            MoveX(-0.5f);
+        }
+        else
+        {
+            MoveX(0.5f);
+        }
+        i++;
+
+        if (i == 200)
+        {
+            i = -200;
+        }
+
+        Shoot();
     }
 }

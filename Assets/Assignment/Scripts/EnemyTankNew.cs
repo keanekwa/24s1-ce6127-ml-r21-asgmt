@@ -25,6 +25,7 @@ public class EnemyTankNew : MonoBehaviour
         if (transform.localPosition.z < posThreshold)
         {
             Destroy(gameObject);
+            // todo: minus 1 point
         }
     }
 
