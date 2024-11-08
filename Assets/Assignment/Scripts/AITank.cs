@@ -46,14 +46,14 @@ public class AITank : Agent
             {
                 score += 2;
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
-                Debug.Log("Hit enemy. Score =" + score.ToString());
+                Debug.Log("Hit enemy. Score = " + score.ToString());
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
                 score -= 1;
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
-                Debug.Log("Hit friendly. Score =" + score.ToString());
+                Debug.Log("Hit friendly. Score = " + score.ToString());
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
         }
@@ -65,9 +65,14 @@ public class AITank : Agent
 
     // allow arrow keys to control AI - for testing
     public override void Heuristic(in ActionBuffers actionsOut)
-    {
+    {   
+        // use left and right arrows to move
         ActionSegment<float> continuousActionsOut = actionsOut.ContinuousActions;
         continuousActionsOut[0] = Input.GetAxis("Horizontal");
+
+        // use space to shoot
+        ActionSegment<int> discreteActionsOut = actionsOut.DiscreteActions;
+        discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -81,14 +86,19 @@ public class AITank : Agent
         else if (collision.gameObject.CompareTag("Friendly"))
         {
             score += 2; // add 2 points for collecting friendly tank
-            Debug.Log("Collected friendly. Score =" + score.ToString());
+            Debug.Log("Collected friendly. Score = " + score.ToString());
         }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         float x = actionBuffers.ContinuousActions[0];
-        Debug.Log(x);
         MoveX(x);
+
+        int shoot = actionBuffers.DiscreteActions[0];
+        if (shoot == 1)
+        {
+            Shoot();
+        }
     }
 }
