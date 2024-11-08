@@ -417,8 +417,12 @@ PrefabInstance:
       value: 4278190080
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
+      propertyPath: m_BehaviorName
+      value: ai-tank-01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BehaviorType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BrainParameters.VectorActionSpaceType
@@ -446,7 +450,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]
-      value: 1
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4215727018057550641, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -35
       objectReference: {fileID: 0}
     - target: {fileID: 4326422932391471075, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_LocalPosition.x

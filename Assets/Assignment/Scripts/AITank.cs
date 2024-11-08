@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -35,6 +36,24 @@ public class AITank : Agent
 
         enemies = FindObjectsOfType<EnemyTankNew>();
         friendlies = FindObjectsOfType<FriendlyTankNew>();
+
+        // for debugging
+        // string enemy_pos = "";
+        // for (int i = 0; i < enemies.Length; i++)
+        // {
+        //     enemy_pos += "x" + i + ":" + enemies[i].transform.position.x + ", ";
+        //     enemy_pos += "z" + i + ":" + enemies[i].transform.position.z + ". ";
+        // }
+        // Debug.LogWarning("Enemy pos = " + enemy_pos);
+
+        // string friendly_pos = "";
+        // for (int i = 0; i < friendlies.Length; i++)
+        // {
+        //     friendly_pos += "x" + i + ":" + friendlies[i].transform.position.x + ", ";
+        //     friendly_pos += "z" + i + ":" + friendlies[i].transform.position.z + ". ";
+        // }
+        // Debug.LogWarning("Friendly pos = " + friendly_pos);
+
         for (int i = 0; i < maxEnemies; i++)
         {
             if (i < enemies.Length)
@@ -116,7 +135,7 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            SetReward(int.MinValue); // lose and restart game
+            AddScore(-10); // lose and restart game
             Debug.Log("Collision with enemy. Game over. New episode starting...");
             EndEpisode();
         }
