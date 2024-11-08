@@ -388,6 +388,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemySpawnPointEnv
       objectReference: {fileID: 0}
+    - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
+      propertyPath: m_BehaviorType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
+      propertyPath: m_BrainParameters.VectorActionSize.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
+      propertyPath: m_BrainParameters.m_ActionSpec.m_NumContinuousActions
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4326422932391471075, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

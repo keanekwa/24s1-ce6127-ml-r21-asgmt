@@ -1,9 +1,9 @@
 using System;
-using Unity.MLAgents.Extensions.Sensors;
-using Unity.Sentis.Layers;
+using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
 using UnityEngine;
 
-public class AITank : MonoBehaviour
+public class AITank : Agent
 {
     private const float speed = 20f;
     private const float range = 30f;
@@ -18,10 +18,19 @@ public class AITank : MonoBehaviour
         origin = rbody.position;
     }
 
-    private void MoveX(float dir)
+    public override void OnEpisodeBegin()
     {
-        dir = Math.Min(1, Math.Max(-1, dir)); // dir should be between -1 (left at full speed) and 1 (right at full speed)
-        float targetX = rbody.position.x + dir * speed * Time.fixedDeltaTime; // move take to desired position
+        if (score >= 20 || score == int.MinValue)
+        {
+            score = 0;
+            transform.localPosition = origin;
+        }
+    }
+
+    private void MoveX(float x)
+    {
+        x = Math.Min(1, Math.Max(-1, x)); // dir should be between -1 (left at full speed) and 1 (right at full speed)
+        float targetX = rbody.position.x + x * speed * Time.fixedDeltaTime; // move take to desired position
         float newX = Math.Min(30f, Math.Max(-30f, targetX)); // ensure tank is within the game boundary
 
         Vector3 newPos = new Vector3(newX, origin.y, origin.z);
@@ -35,15 +44,17 @@ public class AITank : MonoBehaviour
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
-                Debug.Log("Hit Enemy");
                 score += 2;
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
+                Debug.Log("Hit enemy. Score =" + score.ToString());
+                hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
-                Debug.Log("Hit Friendly");
                 score -= 1;
+                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
+                Debug.Log("Hit friendly. Score =" + score.ToString());
+                hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
         }
         else
@@ -52,24 +63,32 @@ public class AITank : MonoBehaviour
         }
     }
 
-    private int i = -200;
-    void FixedUpdate()
+    // allow arrow keys to control AI - for testing
+    public override void Heuristic(in ActionBuffers actionsOut)
     {
-        if (i > 0)
-        {
-            MoveX(-0.5f);
-        }
-        else
-        {
-            MoveX(0.5f);
-        }
-        i++;
+        ActionSegment<float> continuousActionsOut = actionsOut.ContinuousActions;
+        continuousActionsOut[0] = Input.GetAxis("Horizontal");
+    }
 
-        if (i == 200)
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            i = -200;
+            score = int.MinValue; // lose and restart game
+            Debug.Log("Collision with enemy. Game over. New episode starting...");
+            EndEpisode();
         }
+        else if (collision.gameObject.CompareTag("Friendly"))
+        {
+            score += 2; // add 2 points for collecting friendly tank
+            Debug.Log("Collected friendly. Score =" + score.ToString());
+        }
+    }
 
-        Shoot();
+    public override void OnActionReceived(ActionBuffers actionBuffers)
+    {
+        float x = actionBuffers.ContinuousActions[0];
+        Debug.Log(x);
+        MoveX(x);
     }
 }
