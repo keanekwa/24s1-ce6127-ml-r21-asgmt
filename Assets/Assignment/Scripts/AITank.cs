@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -7,17 +8,19 @@ using UnityEngine;
 
 /*
 run 15 - first run that works without crashing, but negative reward
+run 21 - decouple reward and score, penalize for time, but still not winning
+
+to try next: penalize more for time. google to see how people handle setreward vs addreward
 */
 
 public class AITank : Agent
 {
     private const float speed = 20f;
     private const float range = 30f;
+    private const int enemiesObserved = 2;
+    private const int friendliesObserved = 1;
     private Rigidbody rbody;
     private Vector3 origin;
-
-    private EnemyTankNew[] enemies;
-    private FriendlyTankNew[] friendlies;
 
     private int totalScore;
 
@@ -37,55 +40,38 @@ public class AITank : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(transform.position.x);
+        sensor.AddObservation(transform.position.x); // observe agent's own x position. no need to observe y and z because those are fixed.
 
-        enemies = FindObjectsOfType<EnemyTankNew>();
-        friendlies = FindObjectsOfType<FriendlyTankNew>();
-
-        int nearestEnemy = -1;
-        float nearestEnemyZ = 100;
-        for (int i = 0; i < enemies.Length; i++)
-        {   
-            float enemyZ = enemies[i].transform.position.z;
-            if (enemyZ < nearestEnemyZ)
+        EnemyTankNew[] enemies = FindObjectsOfType<EnemyTankNew>();
+        EnemyTankNew[] sortedEnemies = enemies.OrderBy(enemy => enemy.transform.position.z).ToArray();
+        for (int i = 0; i < enemiesObserved; i++)
+        {
+            if (i < sortedEnemies.Length)
             {
-                nearestEnemy = i;
-                nearestEnemyZ = enemyZ;
+                sensor.AddObservation(sortedEnemies[i].transform.position.x);
+                sensor.AddObservation(sortedEnemies[i].transform.position.z);
+            }
+            else
+            {
+                sensor.AddObservation(0);
+                sensor.AddObservation(30);
             }
         }
 
-        if (nearestEnemy > -1)
+        FriendlyTankNew[] friendlies = FindObjectsOfType<FriendlyTankNew>();
+        FriendlyTankNew[] sortedFriendlies = friendlies.OrderBy(friendly => friendly.transform.position.z).ToArray();
+        for (int i = 0; i < friendliesObserved; i++)
         {
-            sensor.AddObservation(enemies[nearestEnemy].transform.position.x);
-            sensor.AddObservation(enemies[nearestEnemy].transform.position.z);
-        }
-        else
-        {
-            sensor.AddObservation(0);
-            sensor.AddObservation(100); // pretend there is an enemy tank far away
-        }
-
-        int nearestFriendly = -1;
-        float nearestFriendlyZ = 100;
-        for (int i = 0; i < friendlies.Length; i++)
-        {   
-            float friendlyZ = friendlies[i].transform.position.z;
-            if (friendlyZ < nearestFriendlyZ)
+            if (i < sortedFriendlies.Length)
             {
-                nearestFriendly = i;
-                nearestFriendlyZ = friendlyZ;
+                sensor.AddObservation(sortedFriendlies[i].transform.position.x);
+                sensor.AddObservation(sortedFriendlies[i].transform.position.z);
             }
-        }
-
-        if (nearestFriendly > -1)
-        {
-            sensor.AddObservation(friendlies[nearestFriendly].transform.position.x);
-            sensor.AddObservation(friendlies[nearestFriendly].transform.position.z);
-        }
-        else
-        {
-            sensor.AddObservation(0);
-            sensor.AddObservation(100); // pretend there is a friendly tank far away
+            else
+            {
+                sensor.AddObservation(0);
+                sensor.AddObservation(30);
+            }
         }
     }
 
@@ -106,7 +92,7 @@ public class AITank : Agent
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                AddScore(2, 0.02f);
+                AddScore(2, 0.1f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
@@ -139,20 +125,19 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            SetReward(-1); // lose and restart game
+            AddReward(-0.5f); // lose and restart game
             Debug.Log("Lost the game. Starting new episode...");
             EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            AddScore(2, 0.01f); // add 2 points for collecting friendly tank
+            AddScore(2, 0.02f); // add 2 points for collecting friendly tank
         }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        AddReward(-0.0005f); // penalize for not winning
-
+        // AddReward(-0.0005f); // penalize for time
         float x = actionBuffers.ContinuousActions[0];
         MoveX(x);
 
@@ -176,7 +161,7 @@ public class AITank : Agent
         if (totalScore >= 20)
         {
             Debug.Log("Victory!!. Starting new episode...");
-            SetReward(1); // win game
+            AddReward(1); // win game
             EndEpisode();
         }
     }
