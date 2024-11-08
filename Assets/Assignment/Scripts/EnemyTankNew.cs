@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyTankNew : MonoBehaviour
 {
     public float speed;
-    [SerializeField] private AITank aiTank;
+    private AITank aiTank;
 
     private Rigidbody rbody;
     // private GameObject enemy;

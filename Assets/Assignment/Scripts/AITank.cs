@@ -1,6 +1,7 @@
 using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Sensors;
 using UnityEngine;
 
 public class AITank : Agent
@@ -9,6 +10,11 @@ public class AITank : Agent
     private const float range = 30f;
     private Rigidbody rbody;
     private Vector3 origin;
+
+    private EnemyTankNew[] enemies;
+    private FriendlyTankNew[] friendlies;
+    private int maxEnemies = 4;
+    private int maxFriendlies = 2;
 
     // Start is called before the first frame update
     void Start()
@@ -21,6 +27,41 @@ public class AITank : Agent
     {
         SetReward(0);
         transform.localPosition = origin;
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        sensor.AddObservation(transform.position.x);
+
+        enemies = FindObjectsOfType<EnemyTankNew>();
+        friendlies = FindObjectsOfType<FriendlyTankNew>();
+        for (int i = 0; i < maxEnemies; i++)
+        {
+            if (i < enemies.Length)
+            {
+                sensor.AddObservation(enemies[i].transform.position.x);
+                sensor.AddObservation(enemies[i].transform.position.z);
+            }
+            else
+            {
+                sensor.AddObservation(0);
+                sensor.AddObservation(100); // pretend the enemy tank is very far away
+            }
+        }
+
+        for (int i = 0; i < friendlies.Length; i++)
+        {
+            if (i < friendlies.Length)
+            {
+                sensor.AddObservation(friendlies[i].transform.position.x);
+                sensor.AddObservation(friendlies[i].transform.position.z);
+            }
+            else
+            {
+                sensor.AddObservation(0);
+                sensor.AddObservation(100); // pretend the friendly tank is very far away
+            }
+        }
     }
 
     private void MoveX(float x)
