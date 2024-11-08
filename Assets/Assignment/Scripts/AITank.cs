@@ -49,7 +49,7 @@ public class AITank : Agent
             }
         }
 
-        for (int i = 0; i < friendlies.Length; i++)
+        for (int i = 0; i < maxFriendlies; i++)
         {
             if (i < friendlies.Length)
             {
