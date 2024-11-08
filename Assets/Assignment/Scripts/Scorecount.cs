@@ -4,6 +4,7 @@ using TMPro;
 public class Scorecount : MonoBehaviour
 {
     [SerializeField] private TMP_Text score;
+    [SerializeField] private AITank aiTank;
 
     // Start is called before the first frame update
     void Start()
@@ -13,6 +14,6 @@ public class Scorecount : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // score.text = AItank.Getscore().ToString();
+        score.text = "Score: " + aiTank.GetCumulativeReward().ToString();
     }
 }

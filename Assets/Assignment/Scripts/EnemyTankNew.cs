@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyTankNew : MonoBehaviour
 {
     public float speed;
-    public GameObject AI;
+    [SerializeField] private AITank aiTank;
 
     private Rigidbody rbody;
     // private GameObject enemy;
@@ -14,6 +14,8 @@ public class EnemyTankNew : MonoBehaviour
     {
         rbody = GetComponent<Rigidbody>();
         // enemy = GetComponent<GameObject>();
+
+        aiTank = FindObjectOfType<AITank>();
     }
 
     // Update is called once per frame
@@ -24,8 +26,9 @@ public class EnemyTankNew : MonoBehaviour
 
         if (transform.localPosition.z < posThreshold)
         {
+            aiTank.AddScore(-1);
+            Debug.Log("Enemy passed through front line. Score = " + aiTank.GetCumulativeReward());
             Destroy(gameObject);
-            // todo: minus 1 point
         }
     }
 
@@ -39,7 +42,6 @@ public class EnemyTankNew : MonoBehaviour
         if (collision.gameObject.name == "Tank")
         {
             Destroy(gameObject);
-
         }
     }
 }

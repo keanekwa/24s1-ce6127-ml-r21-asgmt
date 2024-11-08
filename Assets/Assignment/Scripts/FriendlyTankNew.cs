@@ -29,7 +29,6 @@ public class FriendlyTankNew : MonoBehaviour
     public void Hit()
     {
         Destroy(gameObject);
-        // todo: add 1 point
     }
 
     private void OnCollisionEnter(Collision collision)

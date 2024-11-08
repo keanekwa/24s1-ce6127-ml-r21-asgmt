@@ -7,7 +7,6 @@ public class AITank : Agent
 {
     private const float speed = 20f;
     private const float range = 30f;
-    private int score = 0;
     private Rigidbody rbody;
     private Vector3 origin;
 
@@ -20,11 +19,8 @@ public class AITank : Agent
 
     public override void OnEpisodeBegin()
     {
-        if (score >= 20 || score == int.MinValue)
-        {
-            score = 0;
-            transform.localPosition = origin;
-        }
+        SetReward(0);
+        transform.localPosition = origin;
     }
 
     private void MoveX(float x)
@@ -44,16 +40,16 @@ public class AITank : Agent
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                score += 2;
+                AddScore(2);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
-                Debug.Log("Hit enemy. Score = " + score.ToString());
+                Debug.Log("Hit enemy. Score = " + GetCumulativeReward().ToString());
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                score -= 1;
+                AddScore(-1);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
-                Debug.Log("Hit friendly. Score = " + score.ToString());
+                Debug.Log("Hit friendly. Score = " + GetCumulativeReward().ToString());
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
         }
@@ -79,14 +75,14 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            score = int.MinValue; // lose and restart game
+            SetReward(int.MinValue); // lose and restart game
             Debug.Log("Collision with enemy. Game over. New episode starting...");
             EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            score += 2; // add 2 points for collecting friendly tank
-            Debug.Log("Collected friendly. Score = " + score.ToString());
+            AddScore(2); // add 2 points for collecting friendly tank
+            Debug.Log("Collected friendly. Score = " + GetCumulativeReward().ToString());
         }
     }
 
@@ -100,5 +96,17 @@ public class AITank : Agent
         {
             Shoot();
         }
+    }
+
+    public void AddScore(int reward)
+    {
+        AddReward(reward);
+
+        if (GetCumulativeReward() >= 20)
+        {
+            Debug.Log("Victory!!");
+            EndEpisode();
+        }
+        
     }
 }
