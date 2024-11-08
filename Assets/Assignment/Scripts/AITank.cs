@@ -5,6 +5,10 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
+/*
+run 15 - first run that works without crashing, but negative reward
+*/
+
 public class AITank : Agent
 {
     private const float speed = 20f;
@@ -14,8 +18,8 @@ public class AITank : Agent
 
     private EnemyTankNew[] enemies;
     private FriendlyTankNew[] friendlies;
-    private int maxEnemies = 4;
-    private int maxFriendlies = 2;
+
+    private int totalScore;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +30,7 @@ public class AITank : Agent
 
     public override void OnEpisodeBegin()
     {
+        totalScore = 0;
         SetReward(0);
         transform.localPosition = origin;
     }
@@ -37,49 +42,50 @@ public class AITank : Agent
         enemies = FindObjectsOfType<EnemyTankNew>();
         friendlies = FindObjectsOfType<FriendlyTankNew>();
 
-        // for debugging
-        // string enemy_pos = "";
-        // for (int i = 0; i < enemies.Length; i++)
-        // {
-        //     enemy_pos += "x" + i + ":" + enemies[i].transform.position.x + ", ";
-        //     enemy_pos += "z" + i + ":" + enemies[i].transform.position.z + ". ";
-        // }
-        // Debug.LogWarning("Enemy pos = " + enemy_pos);
-
-        // string friendly_pos = "";
-        // for (int i = 0; i < friendlies.Length; i++)
-        // {
-        //     friendly_pos += "x" + i + ":" + friendlies[i].transform.position.x + ", ";
-        //     friendly_pos += "z" + i + ":" + friendlies[i].transform.position.z + ". ";
-        // }
-        // Debug.LogWarning("Friendly pos = " + friendly_pos);
-
-        for (int i = 0; i < maxEnemies; i++)
-        {
-            if (i < enemies.Length)
+        int nearestEnemy = -1;
+        float nearestEnemyZ = 100;
+        for (int i = 0; i < enemies.Length; i++)
+        {   
+            float enemyZ = enemies[i].transform.position.z;
+            if (enemyZ < nearestEnemyZ)
             {
-                sensor.AddObservation(enemies[i].transform.position.x);
-                sensor.AddObservation(enemies[i].transform.position.z);
-            }
-            else
-            {
-                sensor.AddObservation(0);
-                sensor.AddObservation(100); // pretend the enemy tank is very far away
+                nearestEnemy = i;
+                nearestEnemyZ = enemyZ;
             }
         }
 
-        for (int i = 0; i < maxFriendlies; i++)
+        if (nearestEnemy > -1)
         {
-            if (i < friendlies.Length)
+            sensor.AddObservation(enemies[nearestEnemy].transform.position.x);
+            sensor.AddObservation(enemies[nearestEnemy].transform.position.z);
+        }
+        else
+        {
+            sensor.AddObservation(0);
+            sensor.AddObservation(100); // pretend there is an enemy tank far away
+        }
+
+        int nearestFriendly = -1;
+        float nearestFriendlyZ = 100;
+        for (int i = 0; i < friendlies.Length; i++)
+        {   
+            float friendlyZ = friendlies[i].transform.position.z;
+            if (friendlyZ < nearestFriendlyZ)
             {
-                sensor.AddObservation(friendlies[i].transform.position.x);
-                sensor.AddObservation(friendlies[i].transform.position.z);
+                nearestFriendly = i;
+                nearestFriendlyZ = friendlyZ;
             }
-            else
-            {
-                sensor.AddObservation(0);
-                sensor.AddObservation(100); // pretend the friendly tank is very far away
-            }
+        }
+
+        if (nearestFriendly > -1)
+        {
+            sensor.AddObservation(friendlies[nearestFriendly].transform.position.x);
+            sensor.AddObservation(friendlies[nearestFriendly].transform.position.z);
+        }
+        else
+        {
+            sensor.AddObservation(0);
+            sensor.AddObservation(100); // pretend there is a friendly tank far away
         }
     }
 
@@ -100,16 +106,14 @@ public class AITank : Agent
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                AddScore(2);
+                AddScore(2, 0.02f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
-                Debug.Log("Hit enemy. Score = " + GetCumulativeReward().ToString());
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                AddScore(-1);
+                AddScore(-1, -0.01f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
-                Debug.Log("Hit friendly. Score = " + GetCumulativeReward().ToString());
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
         }
@@ -135,19 +139,20 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            AddScore(-10); // lose and restart game
-            Debug.Log("Collision with enemy. Game over. New episode starting...");
+            SetReward(-1); // lose and restart game
+            Debug.Log("Lost the game. Starting new episode...");
             EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            AddScore(2); // add 2 points for collecting friendly tank
-            Debug.Log("Collected friendly. Score = " + GetCumulativeReward().ToString());
+            AddScore(2, 0.01f); // add 2 points for collecting friendly tank
         }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
+        AddReward(-0.0005f); // penalize for not winning
+
         float x = actionBuffers.ContinuousActions[0];
         MoveX(x);
 
@@ -158,15 +163,21 @@ public class AITank : Agent
         }
     }
 
-    public void AddScore(int reward)
+    public int GetScore()
     {
+        return totalScore;
+    }
+
+    public void AddScore(int score, float reward)
+    {   
+        totalScore += score;
         AddReward(reward);
 
-        if (GetCumulativeReward() >= 20)
+        if (totalScore >= 20)
         {
-            Debug.Log("Victory!!");
+            Debug.Log("Victory!!. Starting new episode...");
+            SetReward(1); // win game
             EndEpisode();
         }
-        
     }
 }

@@ -14,6 +14,6 @@ public class Scorecount : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        score.text = "Score: " + aiTank.GetCumulativeReward().ToString();
+        score.text = "Score: " + aiTank.GetScore().ToString();
     }
 }
