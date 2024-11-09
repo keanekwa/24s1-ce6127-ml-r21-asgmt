@@ -13,6 +13,7 @@ run 15 - first run that works without crashing, but negative reward
 run 21 - decouple reward and score, penalize for time, but still not winning
 run 31 - observe 2 tanks. less negative scores but the tank tends to stay in the corner, and also ends up shooting a lot of friendlies
 run 32 - behavioral cloning. results in a lot more movement from the tank but it is letting a lot of enemies through
+run 44 - finally working. can win games. but it tends to shoot the friendlies. mean reward also does not converge too well.
 */
 
 public class AITank : Agent
