@@ -9,8 +9,8 @@ using UnityEngine;
 /*
 run 15 - first run that works without crashing, but negative reward
 run 21 - decouple reward and score, penalize for time, but still not winning
-
-to try next: penalize more for time. google to see how people handle setreward vs addreward
+run 31 - observe 2 tanks. less negative scores but the tank tends to stay in the corner, and also ends up shooting a lot of friendlies
+run 32 - behavioral cloning. results in a lot more movement from the tank but it is letting a lot of enemies through
 */
 
 public class AITank : Agent
@@ -98,7 +98,7 @@ public class AITank : Agent
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                AddScore(-1, -0.01f);
+                AddScore(-1, -0.05f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
@@ -131,7 +131,7 @@ public class AITank : Agent
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            AddScore(2, 0.02f); // add 2 points for collecting friendly tank
+            AddScore(2, 0.05f);
         }
     }
 
