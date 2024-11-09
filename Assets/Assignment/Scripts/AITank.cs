@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using Unity.Sentis.Layers;
 using UnityEngine;
 
 /*
@@ -62,6 +63,19 @@ public class AITank : Agent
             }
         }
 
+        // reward if agent is positioned between the 2 nearest enemies
+        if (sortedEnemies.Length >= 2)
+        {
+            float maxEnemyX = Math.Max(sortedEnemies[0].transform.position.x, sortedEnemies[1].transform.position.x);
+            float minEnemyX = Math.Min(sortedEnemies[0].transform.position.x, sortedEnemies[1].transform.position.x);
+
+            if (transform.position.x >= minEnemyX && transform.position.x <= maxEnemyX)
+            {
+                AddReward(0.01f);
+            }
+        }
+        
+
         FriendlyTankNew[] friendlies = FindObjectsOfType<FriendlyTankNew>();
         FriendlyTankNew[] sortedFriendlies = friendlies.OrderBy(friendly => friendly.transform.position.z).ToArray();
         for (int i = 0; i < friendliesObserved; i++)
@@ -95,13 +109,13 @@ public class AITank : Agent
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                AddScore(2, 0.1f);
+                AddScore(2, Math.Min(2 * hit.distance / range, 1)); // reward for further kills
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                AddScore(-1, -0.05f);
+                AddScore(-1, -0.1f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
@@ -146,13 +160,13 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
-            AddReward(-0.5f); // lose and restart game
+            AddReward(-0.1f); // lose and restart game
             totalScore = int.MinValue; // for showing game over text
             StartCoroutine(PauseAndEndEpisode());
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            AddScore(2, 0.05f);
+            AddScore(2, 0.8f);
         }
     }
 
@@ -184,9 +198,14 @@ public class AITank : Agent
         return "Score: " + totalScore.ToString();
     }
 
-    public void OnEnemyPassFrontline()
+    public void OnEnemyPassFrontline(float enemyX)
     {
-        AddScore(-1, -0.07f);
+        AddScore(-1, -Math.Min(0.5f * Math.Abs(enemyX - transform.position.x), 0.1f)); // penalize not getting close to the enemy and just letting it pass
+    }
+
+    public void OnFriendlyPassFrontline()
+    {
+        AddScore(0, -0.05f); // penalize for letting friendlies pass
     }
 
     public void AddScore(int score, float reward)
@@ -196,7 +215,7 @@ public class AITank : Agent
 
         if (totalScore >= 20)
         {
-            AddReward(1); // win game
+            AddReward(5); // win game
             StartCoroutine(PauseAndEndEpisode());
         }
     }

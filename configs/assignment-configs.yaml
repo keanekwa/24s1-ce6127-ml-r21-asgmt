@@ -2,8 +2,8 @@ behaviors:
   ai-tank-01:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 128
-      buffer_size: 1024
+      batch_size: 256
+      buffer_size: 2048
       learning_rate: 1.0e-3
       beta: 0.01
       epsilon: 0.2

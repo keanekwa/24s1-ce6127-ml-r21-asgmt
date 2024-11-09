@@ -5,16 +5,19 @@ public class FriendlyTankNew : MonoBehaviour
     public float speed;
     public GameObject AI;
 
+    private AITank aiTank;
+
     // private Rigidbody rbody;
     // private GameObject enemy;
 
     private const float posThreshold = -37f;
 
-    // void Start()
-    // {
-    //     rbody = GetComponent<Rigidbody>();
-    //     enemy = GetComponent<GameObject>();
-    // }
+    void Start()
+    {
+        // rbody = GetComponent<Rigidbody>();
+        // enemy = GetComponent<GameObject>();
+        aiTank = FindObjectOfType<AITank>();
+    }
 
     void Update()
     {
@@ -22,6 +25,7 @@ public class FriendlyTankNew : MonoBehaviour
 
         if (transform.localPosition.z < posThreshold)
         {
+            aiTank.OnFriendlyPassFrontline();
             Destroy(gameObject);
         }
     }
