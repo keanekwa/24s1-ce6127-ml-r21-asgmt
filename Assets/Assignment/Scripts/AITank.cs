@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents;
@@ -15,6 +16,7 @@ run 32 - behavioral cloning. results in a lot more movement from the tank but it
 
 public class AITank : Agent
 {
+    [SerializeField] private TankNewSpawn tankNewSpawn;
     private const float speed = 20f;
     private const float range = 30f;
     private const int enemiesObserved = 2;
@@ -23,6 +25,7 @@ public class AITank : Agent
     private Vector3 origin;
 
     private int totalScore;
+    private bool isPaused;
 
     // Start is called before the first frame update
     void Start()
@@ -33,6 +36,7 @@ public class AITank : Agent
 
     public override void OnEpisodeBegin()
     {
+        isPaused = false;
         totalScore = 0;
         SetReward(0);
         transform.localPosition = origin;
@@ -77,8 +81,7 @@ public class AITank : Agent
 
     private void MoveX(float x)
     {
-        x = Math.Min(1, Math.Max(-1, x)); // dir should be between -1 (left at full speed) and 1 (right at full speed)
-        float targetX = rbody.position.x + x * speed * Time.fixedDeltaTime; // move take to desired position
+        float targetX = rbody.position.x + (x-1) * speed * Time.fixedDeltaTime; // move tank to desired position
         float newX = Math.Min(30f, Math.Max(-30f, targetX)); // ensure tank is within the game boundary
 
         Vector3 newPos = new Vector3(newX, origin.y, origin.z);
@@ -112,13 +115,31 @@ public class AITank : Agent
     // allow arrow keys to control AI - for testing
     public override void Heuristic(in ActionBuffers actionsOut)
     {   
-        // use left and right arrows to move
-        ActionSegment<float> continuousActionsOut = actionsOut.ContinuousActions;
-        continuousActionsOut[0] = Input.GetAxis("Horizontal");
+        // // use left and right arrows to move
+        // ActionSegment<float> continuousActionsOut = actionsOut.ContinuousActions;
+        // continuousActionsOut[0] = Input.GetAxis("Horizontal");
 
         // use space to shoot
         ActionSegment<int> discreteActionsOut = actionsOut.DiscreteActions;
         discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
+
+        // use arrow keys to move, but only have discrete actions
+        if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.RightArrow))
+        {
+            discreteActionsOut[1] = 1;
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            discreteActionsOut[1] = 0;
+        }
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            discreteActionsOut[1] = 2;
+        }
+        else
+        {
+            discreteActionsOut[1] = 1;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -126,8 +147,8 @@ public class AITank : Agent
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
             AddReward(-0.5f); // lose and restart game
-            Debug.Log("Lost the game. Starting new episode...");
-            EndEpisode();
+            totalScore = int.MinValue; // for showing game over text
+            StartCoroutine(PauseAndEndEpisode());
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
@@ -136,9 +157,10 @@ public class AITank : Agent
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
-    {
-        // AddReward(-0.0005f); // penalize for time
-        float x = actionBuffers.ContinuousActions[0];
+    {   
+        if (isPaused) return;
+
+        float x = actionBuffers.DiscreteActions[1];
         MoveX(x);
 
         int shoot = actionBuffers.DiscreteActions[0];
@@ -148,9 +170,23 @@ public class AITank : Agent
         }
     }
 
-    public int GetScore()
+    public string GetScore()
     {
-        return totalScore;
+        if (totalScore >= 20)
+        {
+            return "Victory! New round starting soon...";
+        }
+        else if (totalScore == int.MinValue)
+        {
+            return "Game Over! New round starting soon...";
+        }
+
+        return "Score: " + totalScore.ToString();
+    }
+
+    public void OnEnemyPassFrontline()
+    {
+        AddScore(-1, -0.07f);
     }
 
     public void AddScore(int score, float reward)
@@ -160,9 +196,16 @@ public class AITank : Agent
 
         if (totalScore >= 20)
         {
-            Debug.Log("Victory!!. Starting new episode...");
             AddReward(1); // win game
-            EndEpisode();
+            StartCoroutine(PauseAndEndEpisode());
         }
+    }
+
+    private IEnumerator PauseAndEndEpisode()
+    {
+        isPaused = true;
+        tankNewSpawn.DestroyAllTanks();
+        yield return new WaitForSeconds(3);
+        EndEpisode();
     }
 }

@@ -26,7 +26,7 @@ public class EnemyTankNew : MonoBehaviour
 
         if (transform.localPosition.z < posThreshold)
         {
-            aiTank.AddScore(-1, -0.07f);
+            aiTank.OnEnemyPassFrontline();
             Destroy(gameObject);
         }
     }
