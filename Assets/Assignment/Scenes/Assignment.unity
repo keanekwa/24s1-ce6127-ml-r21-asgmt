@@ -437,7 +437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BehaviorName
-      value: ai-tank-01
+      value: ai-tank-02
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BehaviorType

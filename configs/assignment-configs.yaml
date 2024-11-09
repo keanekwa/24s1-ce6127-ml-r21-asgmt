@@ -26,11 +26,11 @@ behaviors:
   ai-tank-02:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 128
-      buffer_size: 1024
-      learning_rate: 3.0e-4
-      beta: 0.01
-      epsilon: 0.2
+      batch_size: 256
+      buffer_size: 2048
+      learning_rate: 0.5e-4
+      beta: 1.0e-3
+      epsilon: 0.1
       lambd: 0.99
       num_epoch: 3
       learning_rate_schedule: linear
@@ -38,18 +38,18 @@ behaviors:
       epsilon_schedule: constant
     network_settings:
       normalize: false
-      hidden_units: 128
-      num_layers: 2
+      hidden_units: 256
+      num_layers: 3
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
       gail:
         strength: 0.5
-        demo_path: Demo/Demo.demo
+        demo_path: Demo/Demo_0.demo
     behavioral_cloning:
       strength: 0.5
-      demo_path: Demo/Demo.demo
+      demo_path: Demo/Demo_0.demo
     max_steps: 500000
     time_horizon: 1024
     summary_freq: 10000
