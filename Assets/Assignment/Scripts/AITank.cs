@@ -115,7 +115,7 @@ public class AITank : Agent
             }
             else if (hit.collider.CompareTag("Friendly"))
             {   
-                AddScore(-1, -0.1f);
+                AddScore(-1, -0.3f);
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red); 
                 hit.collider.gameObject.GetComponent<FriendlyTankNew>().Hit();
             }
@@ -166,7 +166,7 @@ public class AITank : Agent
         }
         else if (collision.gameObject.CompareTag("Friendly"))
         {
-            AddScore(2, 0.8f);
+            AddScore(2, 1);
         }
     }
 
