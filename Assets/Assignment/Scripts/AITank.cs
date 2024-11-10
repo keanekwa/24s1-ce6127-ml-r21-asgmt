@@ -77,7 +77,6 @@ public class AITank : Agent
                 AddReward(0.01f);
             }
         }
-        
 
         FriendlyTankNew[] friendlies = FindObjectsOfType<FriendlyTankNew>();
         FriendlyTankNew[] sortedFriendlies = friendlies.OrderBy(friendly => friendly.transform.position.z).ToArray();
@@ -92,6 +91,37 @@ public class AITank : Agent
             {
                 sensor.AddObservation(0);
                 sensor.AddObservation(30);
+            }
+        }
+
+        // reward if agent is directly in front of the nearest enemy if enemy is within firing range
+        if (sortedEnemies.Length >= 2)
+        {   
+            float enemyX = sortedEnemies[0].transform.position.x;
+            float enemyZ = sortedEnemies[0].transform.position.z;
+
+            if ((enemyZ - transform.position.z) <= range * 1.2)
+            {
+                AddReward(-(float)Math.Pow(0.0015 * Math.Abs(transform.position.x - enemyX), 2)); // stand in front of tanks far away but within firing range
+            }
+
+            float enemy2X = sortedEnemies[1].transform.position.x;
+            float enemy2Z = sortedEnemies[1].transform.position.z;
+
+            if ((enemy2Z - transform.position.z) <= range * 1.5)
+            {
+                AddReward(-(float)Math.Pow(0.001 * Math.Abs(transform.position.x - enemy2X), 2)); // stand in front of tanks far away but within firing range
+            }
+
+            // reward agent if it is directly in front of the nearest friendly given there are no enemies in firing range
+            if (sortedFriendlies.Length >= 1)
+            {
+                float friendlyX = sortedFriendlies[0].transform.position.x;
+                
+                if (Math.Abs(transform.position.x - friendlyX) <= 0.8f && (enemyZ - transform.position.z) > range)
+                {
+                    AddReward(0.01f);
+                }
             }
         }
     }
@@ -112,7 +142,7 @@ public class AITank : Agent
         {
             if (hit.collider.CompareTag("EnemyAI"))
             {
-                AddScore(2, Math.Min(2 * hit.distance / range, 1)); // reward for further kills
+                AddScore(2, Math.Min(5 * hit.distance / range, 2)); // reward for further kills
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.green); 
                 hit.collider.gameObject.GetComponent<EnemyTankNew>().Hit();
             }
@@ -163,6 +193,10 @@ public class AITank : Agent
     {
         if (collision.gameObject.CompareTag("EnemyAI"))
         {
+            if (GetCumulativeReward() > 0)
+            {
+                AddReward(-GetCumulativeReward() / 2); // slash rewards for dying with a high score
+            }
             AddReward(-0.1f); // lose and restart game
             totalScore = int.MinValue; // for showing game over text
             StartCoroutine(PauseAndEndEpisode());
@@ -176,6 +210,8 @@ public class AITank : Agent
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {   
         if (isPaused) return;
+
+        Debug.Log(GetCumulativeReward());
 
         float x = actionBuffers.DiscreteActions[1];
         MoveX(x);

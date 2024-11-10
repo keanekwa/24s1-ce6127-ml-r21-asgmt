@@ -2,9 +2,9 @@ behaviors:
   ai-tank-01:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 256
-      buffer_size: 2048
-      learning_rate: 0.5e-4
+      batch_size: 128
+      buffer_size: 1024
+      learning_rate: 0.7e-4
       beta: 1.0e-3
       epsilon: 0.1
       lambd: 0.99
@@ -18,10 +18,10 @@ behaviors:
       num_layers: 3
     reward_signals:
       extrinsic:
-        gamma: 0.99
+        gamma: 0.9
         strength: 1.0
     max_steps: 500000
-    time_horizon: 1024
+    time_horizon: 256
     summary_freq: 10000
   ai-tank-02:
     trainer_type: ppo
