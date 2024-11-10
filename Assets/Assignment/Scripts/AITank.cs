@@ -102,7 +102,7 @@ public class AITank : Agent
 
             if ((enemyZ - transform.position.z) <= range * 1.2)
             {
-                AddReward(-(float)Math.Pow(0.0015 * Math.Abs(transform.position.x - enemyX), 2)); // stand in front of tanks far away but within firing range
+                AddReward(-(float)Math.Pow(0.0015 * Math.Abs(transform.position.x - enemyX), 2)); // penalize proportional to square distance from nearest tank
             }
 
             float enemy2X = sortedEnemies[1].transform.position.x;
@@ -110,7 +110,7 @@ public class AITank : Agent
 
             if ((enemy2Z - transform.position.z) <= range * 1.5)
             {
-                AddReward(-(float)Math.Pow(0.001 * Math.Abs(transform.position.x - enemy2X), 2)); // stand in front of tanks far away but within firing range
+                AddReward(-(float)Math.Pow(0.001 * Math.Abs(transform.position.x - enemy2X), 2)); // penalize proportional to square distance from 2nd nearest tank
             }
 
             // reward agent if it is directly in front of the nearest friendly given there are no enemies in firing range
@@ -211,7 +211,7 @@ public class AITank : Agent
     {   
         if (isPaused) return;
 
-        Debug.Log(GetCumulativeReward());
+        // Debug.Log(GetCumulativeReward());
 
         float x = actionBuffers.DiscreteActions[1];
         MoveX(x);
