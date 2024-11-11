@@ -16,6 +16,7 @@ run 32 - behavioral cloning. results in a lot more movement from the tank but it
 run 44 - finally working. can win games. but it tends to shoot the friendlies. mean reward also does not converge too well.
 run 46 - lower the learning rate and epsilon. also increase reward for collecting friendly and penalize more for shooting friendly. 
 run 47 - behavioral cloning. quite useless since my strategy is to wait in front of the enemy and shoot it, but the agent ends up always kiling itself
+run 57 - clone behaviour through reward system
 */
 
 public class AITank : Agent
