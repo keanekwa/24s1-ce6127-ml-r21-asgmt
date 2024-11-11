@@ -434,14 +434,14 @@ PrefabInstance:
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5022602860645237092, guid: b3b5b172b9ab0474d8b519c91fd86e2f, type: 3}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BehaviorName
       value: ai-tank-01
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BehaviorType
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3086979299881993591, guid: 339fd31138bdc6e468f8bb0fb8f4c691, type: 3}
       propertyPath: m_BrainParameters.VectorActionSpaceType
